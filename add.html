@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar producto</title>
+  <link rel="stylesheet" href="css/uikit.min.css" />
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+  <script src="jquery.min.js"></script>
+  <script src="uikit.min.js"></script>
+  <script src="uikit-icons.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+  <script>if (window.module) module = window.module;</script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyC47qEazZdyTqzYCc99Mhpqwuwp3mdaSqM",
+      authDomain: "inventario-a09a6.firebaseapp.com",
+      databaseURL: "https://inventario-a09a6.firebaseio.com",
+      projectId: "inventario-a09a6",
+      storageBucket: "inventario-a09a6.appspot.com",
+      messagingSenderId: "782810131722"
+    };
+    firebase.initializeApp(config);
+  </script>
+</head>
+
+<body>
+
+  <div style="padding: 100px; text-align: center">
+    
+      <h2>Agregar producto</h2>
+    <div style="text-align: left">
+      <div>
+        <label class="uk-form-label">Nombre del producto</label>
+        <input class="uk-input" id="nombre" style="margin-bottom: 20px" />
+      </div>
+      <div class="uk-flex uk-flex-center">
+        <div>
+          <label class="uk-form-label">Fecha de elaboración</label>
+          <input class="uk-input" id="elab" type="date" style="margin-bottom: 20px" />
+        </div>
+        <div>
+          <label class="uk-form-label">Fecha de vencimiento</label>
+          <input class="uk-input" id="expire" type="date" style="margin-bottom: 20px" />
+        </div>
+      </div>
+      <div class="uk-flex uk-flex-center">
+        <div>
+          <label class="uk-form-label">Precio por unidad</label>
+          <input class="uk-input" id="unit" type="number" value="0" style="margin-bottom: 20px" />
+        </div>
+        <div>
+          <label class="uk-form-label">Precio al por mayor</label>
+          <input class="uk-input" id="whole" type="number" value="0" style="margin-bottom: 20px" />
+        </div>
+        <div>
+          <label class="uk-form-label">Cantidad en existencia</label>
+          <input class="uk-input" id="stock" type="number" value="0" style="margin-bottom: 20px" />
+        </div>
+      </div>
+    </div>
+    <button class="uk-button uk-button-default" onclick="writeUserData()">Agregar</button>
+  </div>
+  <button hidden class="uk-button uk-button-default uk-margin-small-right openthischeese" type="button" uk-toggle="target: #modal-example">Open</button>
+  <div id="modal-example" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body">
+          <h2 class="uk-modal-title">Aviso</h2>
+          <p>El producto se ha agregado correctamente</p>
+          <p class="uk-text-right">
+              <button class="uk-button uk-button-primary" type="button" onclick="closethis()">Aceptar</button>
+          </p>
+      </div>
+  </div>
+  <script>
+    // You can also require other files to run in this process    
+    function writeUserData() {
+      
+      firebase.database().ref('/lifetime_products').once('value').then(function (snapshot) {
+        var length = (snapshot.val()) || 0;
+        var today = new Date();
+      var dd = today.getDate();
+      var mm = today.getMonth() + 1; //January is 0!
+
+      var yyyy = today.getFullYear();
+      if (dd < 10) {
+        dd = '0' + dd;
+      }
+      if (mm < 10) {
+        mm = '0' + mm;
+      }
+      var today = yyyy + '-' + mm + '-' + dd;
+      let newProduct = {
+        id: length + 1,
+        nombre: jQuery("#nombre").val(),
+        fecha_creacion: today,
+        fecha_elaboracion: jQuery("#elab").val(),
+        fecha_vencimiento: jQuery("#expire").val(),
+        precio_unidad: parseFloat(jQuery("#unit").val()),
+        precio_mayor: parseFloat(jQuery("#whole").val()),
+        cantidad: parseInt(jQuery("#stock").val()),
+        venta_semanal: 0,
+        venta_quincenal: 0
+      }
+      console.log(newProduct);
+      firebase.database().ref('products/' + (length + 1)).set(newProduct);
+      firebase.database().ref('lifetime_products').set(length + 1);
+      
+      jQuery(".openthischeese").click();
+      });
+      
+    }
+
+    function closethis() {
+      const remote = require('electron').remote;
+
+        var window = remote.getCurrentWindow();
+        window.close();
+    }
+    /*  var database = firebase.database();
+      firebase.database().ref('/productos/producto').once('value').then(function (snapshot) {
+        var username = (snapshot.val() && snapshot.val().nombre) || 'Anonymous';
+  
+        console.log(username);
+      });*/
+    require('./renderer.js')
+  </script>
+</body>
+
+</html>

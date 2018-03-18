@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>¡Bienvenido!</title>
+  <link rel="stylesheet" href="css/uikit.min.css" />
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+  <!-- normal script imports etc  -->
+  <script src="jquery.min.js"></script>
+  <script src="uikit.min.js"></script>
+  <script src="uikit-icons.min.js"></script>
+
+  <!-- Insert this line after script imports -->
+  <script>if (window.module) module = window.module;</script>
+</head>
+
+<body>
+
+  <div style="padding: 20%; text-align: center">
+    <h2>¡Bienvenido!</h2>
+    <input class="uk-input" title="Usuario" id="user" placeholder="Nombre de usuario" style="margin-bottom: 20px" />
+    <input class="uk-input" title="Contraseña" id="pass" placeholder="Contraseña" type="password" style="margin-bottom: 20px"
+    />
+    <button class="uk-button uk-button-default" onclick="validate()">Ingresar</button>
+  </div>
+  <script>
+    // You can also require other files to run in this process
+    function validate() {
+      if (jQuery("#user").val() == 'admin' && jQuery("#pass").val() == '1234') {
+        const remote = require('electron').remote;
+
+        const path = require('path')
+        const url = require('url')
+        const BrowserWindow = remote.BrowserWindow;
+
+        var win = new BrowserWindow({ width: 800, height: 600, resizable: false });
+
+        win.loadURL(url.format({
+          pathname: path.join(__dirname, 'main.html'),
+          protocol: 'file:',
+          slashes: true
+        }))
+        var window = remote.getCurrentWindow();
+        window.close();
+      }
+      else {
+        alert("Credenciales inválidas")
+
+      }
+
+    }
+    require('./renderer.js')
+  </script>
+</body>
+
+</html>

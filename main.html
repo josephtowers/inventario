@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Página principal</title>
+  <link rel="stylesheet" href="css/uikit.min.css" />
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+  <script src="jquery.min.js"></script>
+  <script src="uikit.min.js"></script>
+  <script src="uikit-icons.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+  <script>if (window.module) module = window.module;</script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyC47qEazZdyTqzYCc99Mhpqwuwp3mdaSqM",
+      authDomain: "inventario-a09a6.firebaseapp.com",
+      databaseURL: "https://inventario-a09a6.firebaseio.com",
+      projectId: "inventario-a09a6",
+      storageBucket: "inventario-a09a6.appspot.com",
+      messagingSenderId: "782810131722"
+    };
+    firebase.initializeApp(config);
+    function addProduct(){
+      const remote = require('electron').remote;
+
+      const path = require('path')
+      const url = require('url')
+      const BrowserWindow = remote.BrowserWindow;
+
+      var win = new BrowserWindow({ width: 800, height: 600, resizable: false });
+
+      win.loadURL(url.format({
+        pathname: path.join(__dirname, 'add.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+    }
+    function searches(){
+      const remote = require('electron').remote;
+
+      const path = require('path')
+      const url = require('url')
+      const BrowserWindow = remote.BrowserWindow;
+
+      var win = new BrowserWindow({ width: 800, height: 600, resizable: false });
+
+      win.loadURL(url.format({
+        pathname: path.join(__dirname, 'search.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+      win.maximize()
+    }
+    function sales(){
+      const remote = require('electron').remote;
+
+      const path = require('path')
+      const url = require('url')
+      const BrowserWindow = remote.BrowserWindow;
+
+      var win = new BrowserWindow({ width: 800, height: 600, resizable: false });
+
+      win.loadURL(url.format({
+        pathname: path.join(__dirname, 'sales.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+      win.maximize()
+    }
+  </script>
+</head>
+
+<body>
+
+  <div style="padding: 20%; text-align: center">
+    <h2>Página principal</h2>
+    <div class="uk-flex uk-flex-center"  uk-sortable>
+      <div class="uk-card uk-card-default uk-card-body uk-margin-left">
+        <a class="uk-link-text" href="#" onclick="addProduct()">Agregar producto</a>
+      </div>
+      <div class="uk-card uk-card-default uk-card-body uk-margin-left">
+        <a class="uk-link-text" href="#" onclick="searches()">Consultar producto</a>
+      </div>
+      <div class="uk-card uk-card-default uk-card-body uk-margin-left">
+        <a class="uk-link-text" href="#" onclick="sales()">Registrar venta</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // You can also require other files to run in this process
+    /*  var database = firebase.database();
+      firebase.database().ref('/productos/producto').once('value').then(function (snapshot) {
+        var username = (snapshot.val() && snapshot.val().nombre) || 'Anonymous';
+  
+        console.log(username);
+      });*/
+    require('./renderer.js')
+  </script>
+</body>
+
+</html>

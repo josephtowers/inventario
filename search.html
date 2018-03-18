@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Consultar producto</title>
+  <link rel="stylesheet" href="css/uikit.min.css" />
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+  <script src="jquery.min.js"></script>
+  <script src="uikit.min.js"></script>
+  <script src="uikit-icons.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+  <script>if (window.module) module = window.module;</script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyC47qEazZdyTqzYCc99Mhpqwuwp3mdaSqM",
+      authDomain: "inventario-a09a6.firebaseapp.com",
+      databaseURL: "https://inventario-a09a6.firebaseio.com",
+      projectId: "inventario-a09a6",
+      storageBucket: "inventario-a09a6.appspot.com",
+      messagingSenderId: "782810131722"
+    };
+    firebase.initializeApp(config);
+  </script>
+</head>
+
+<body>
+
+  <div style="padding: 100px; text-align: center">
+    <h2>Consultar producto</h2>
+    <div class="uk-card uk-card-default uk-card-body">
+      <input class="uk-input" title="Nombre de producto" id="criteria" placeholder="Ingrese el nombre del producto que desea buscar" style="margin-bottom: 20px"
+      />
+    </div>
+    <table class="uk-table uk-table-striped uk-table-small" style="text-align: left">
+      <thead>
+        <tr>
+          <th class="uk-table-shrink">ID</th>
+          <th>Nombre</th>
+          <th>Fecha de entrada al sistema</th>
+          <th>Fecha de elaboraci&oacute;n</th>
+          <th>Fecha de vencimiento</th>
+          <th>Precio por unidad</th>
+          <th>Precio al por mayor</th>
+          <th>Cantidad en existencia</th>
+          <th>Venta semanal</th>
+          <th>Venta quincenal</th>
+        </tr>
+      </thead>
+      <tbody id="products">
+
+      </tbody>
+    </table>
+    <div uk-alert style="display: none" id="noresults">
+      <h3>Aviso</h3>
+      <p>La búsqueda no obtuvo ningún resultado. Verifique que ha escrito el producto correctamente e inténtelo de nuevo.</p>
+  </div>
+  <button hidden class="uk-button uk-button-default uk-margin-small-right wethebest" type="button" uk-toggle="target: #modal-example-three">Open</button>
+  
+    <div id="modal-example-three" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body underten">
+          <button class="uk-modal-close-default" type="button" uk-close></button>
+          <h2 class="uk-modal-title">Aviso</h2>
+          <p id="explan">Los siguientes productos tienen 10 unidades o menos en existencia:</p>
+          <p class="uk-text-right">
+              <button class="uk-button uk-button-primary uk-modal-close" type="button">Aceptar</button>
+          </p>
+      </div>
+  </div>
+  </div>
+  <script>
+    // You can also require other files to run in this process
+    jQuery(document).ready(function () {
+      let productList = [];
+      let underTen = []
+      var database = firebase.database();
+      firebase.database().ref('/products').once('value').then(function (snapshot) {
+        var products = (snapshot.val()) || null;
+        for (let p in products)  {
+          if (typeof products[p] == 'object') {
+            if(products[p].cantidad <= 10) underTen.push(products[p])
+            productList.push(products[p])
+          }
+        }
+        for (let p of productList) {
+            jQuery("#noresults").slideUp(100)
+          jQuery("#products").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>"+p.venta_semanal+"</td><td>"+p.venta_quincenal+"</td></tr>");
+        }
+        if(underTen.length) {
+          let inputText = "<ul>"
+          for(let u of underTen) {
+            inputText += "<li>" + u.nombre + "</li>"
+          }
+          inputText += "</ul>"
+          jQuery("#explan").after(inputText)
+          jQuery(".wethebest").click()
+        }
+      });
+      jQuery("#criteria").on("input", function () {
+        let searchResults = []
+        let context = jQuery("#criteria")
+        if (context.val().length > 0) {
+          for (let p of productList) {
+            if (p.nombre.toLowerCase().search(context.val().toLowerCase()) >= 0) {
+              searchResults.push(p)
+            }
+          }
+          jQuery("#products").html("");
+          if (searchResults.length) {
+
+
+            for (let p of searchResults) {
+            jQuery("#noresults").slideUp(100)
+              jQuery("#products").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>"+p.venta_semanal+"</td><td>"+p.venta_quincenal+"</td></tr>");
+            }
+          }
+          else {
+            jQuery("#noresults").slideDown(100)
+           }
+
+        }
+        else {
+          jQuery("#products").html("");
+          for (let p of productList) {
+            jQuery("#noresults").slideUp(100)
+            jQuery("#products").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>"+p.venta_semanal+"</td><td>"+p.venta_quincenal+"</td></tr>");
+          }
+        }
+      })
+    })
+
+    require('./renderer.js')
+  </script>
+</body>
+
+</html>

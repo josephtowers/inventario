@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar venta</title>
+  <link rel="stylesheet" href="css/uikit.min.css" />
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+  <script src="jquery.min.js"></script>
+  <script src="uikit.min.js"></script>
+  <script src="uikit-icons.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+  <script>if (window.module) module = window.module;</script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyC47qEazZdyTqzYCc99Mhpqwuwp3mdaSqM",
+      authDomain: "inventario-a09a6.firebaseapp.com",
+      databaseURL: "https://inventario-a09a6.firebaseio.com",
+      projectId: "inventario-a09a6",
+      storageBucket: "inventario-a09a6.appspot.com",
+      messagingSenderId: "782810131722"
+    };
+    firebase.initializeApp(config);
+  </script>
+</head>
+
+<body>
+  <div class="uk-flex uk-flex-between">
+    <div class="uk-width-1-2" style="padding: 100px 60px; text-align: center">
+
+      <h2>Factura</h2>
+      <table class="uk-table uk-table-striped uk-table-small" style="text-align: left">
+        <thead>
+          <tr>
+            <th class="uk-table-shrink">ID</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Precio total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="receipts">
+
+        </tbody>
+      </table>
+      <button class="uk-button uk-button-primary" id="save" onclick="saveSale()" style="display: none" type="button">Registrar</button>
+        
+    </div>
+    <div class="uk-width-1-2" style="padding: 100px; text-align: center">
+      <h2>Buscar producto</h2>
+      <div class="uk-card uk-card-default uk-card-body">
+        <input class="uk-input" title="Nombre de producto" id="criteria" placeholder="Ingrese el nombre del producto que desea buscar"
+          style="margin-bottom: 20px" />
+      </div>
+      <table class="uk-table thistable uk-table-striped uk-table-small uk-table-hover" style="text-align: left">
+        <thead>
+          <tr>
+            <th class="uk-table-shrink">ID</th>
+            <th>Nombre</th>
+            <th>Precio por unidad</th>
+            <th>Precio al por mayor</th>
+            <th>Cantidad en existencia</th>
+          </tr>
+        </thead>
+      </table>
+      <div uk-alert style="display: none" id="noresults">
+        <h3>Aviso</h3>
+        <p>La búsqueda no obtuvo ningún resultado. Verifique que ha escrito el producto correctamente e inténtelo de nuevo.</p>
+      </div>
+    </div>
+    <button hidden class="uk-button uk-button-default uk-margin-small-right openthischeese" type="button" uk-toggle="target: #modal-example">Open</button>
+    <div id="modal-example" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body">
+          <button class="uk-modal-close-default" type="button" uk-close></button>
+        <h2 class="uk-modal-title">Agregar</h2>
+        <table class="uk-table uk-table-striped uk-table-small" style="text-align: left">
+          <thead>
+            <tr>
+              <th class="uk-table-shrink">ID</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Precio total</th>
+            </tr>
+          </thead>
+          <tbody id="receipt">
+
+          </tbody>
+        </table>
+        <p class="uk-text-right">
+          <button class="uk-button uk-button-primary uk-modal-close" onclick="addProduct()" type="button">Aceptar</button>
+        </p>
+      </div>
+    </div>
+    <button hidden class="uk-button uk-button-default uk-margin-small-right anotherone" type="button" uk-toggle="target: #modal-example-two">Open</button>
+  
+    <div id="modal-example-two" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body">
+          <h2 class="uk-modal-title">Aviso</h2>
+          <p>La venta se ha agregado correctamente</p>
+          <p class="uk-text-right">
+              <button class="uk-button uk-button-primary" type="button" onclick="closethis()">Aceptar</button>
+          </p>
+      </div>
+  </div>
+  <button hidden class="uk-button uk-button-default uk-margin-small-right wethebest" type="button" uk-toggle="target: #modal-example-three">Open</button>
+  
+    <div id="modal-example-three" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body underten">
+          <button class="uk-modal-close-default" type="button" uk-close></button>
+          <h2 class="uk-modal-title">Aviso</h2>
+          <p id="explan">Los siguientes productos tienen 10 unidades o menos en existencia:</p>
+          <p class="uk-text-right">
+              <button class="uk-button uk-button-primary uk-modal-close" type="button">Aceptar</button>
+          </p>
+      </div>
+  </div>
+  </div>
+
+  <script>
+    // You can also require other files to run in this process
+
+    let productList = [];
+    let underTen = []
+    let currentProd = null
+    let tipo = 'Unidad'
+    let t = 0
+    let price = 0
+    let quantity = 1
+    let prods = []
+    jQuery(document).ready(function () {
+
+      var database = firebase.database();
+      firebase.database().ref('/products').once('value').then(function (snapshot) {
+        var products = (snapshot.val()) || null;
+        for (let p in products)  {
+          if (typeof products[p] == 'object') {
+            if(products[p].cantidad <= 10) underTen.push(products[p])
+            productList.push(products[p])
+          }
+        }
+        console.log(productList)
+        for (let p of productList) {
+          jQuery("#noresults").slideUp(100)
+          jQuery(".thistable").append("<tr onclick='addMe(" + p.id + ")' onclick='alert()' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td></tr>");
+        }
+        if(underTen.length) {
+          let inputText = "<ul>"
+          for(let u of underTen) {
+            inputText += "<li>" + u.nombre + "</li>"
+          }
+          inputText += "</ul>"
+          jQuery("#explan").after(inputText)
+          jQuery(".wethebest").click()
+        }
+      });
+      jQuery("#criteria").on("input", function () {
+        let searchResults = []
+        let context = jQuery("#criteria")
+        if (context.val().length > 0) {
+          for (let p of productList) {
+            if (p.nombre.toLowerCase().search(context.val().toLowerCase()) >= 0) {
+              searchResults.push(p)
+            }
+          }
+          jQuery(".thistable").html("");
+          if (searchResults.length) {
+
+
+            for (let p of searchResults) {
+              jQuery("#noresults").slideUp(100)
+              jQuery(".thistable").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td></tr>");
+            }
+          }
+          else {
+            jQuery("#noresults").slideDown(100)
+          }
+
+        }
+        else {
+          jQuery(".thistable").html("");
+          for (let p of productList) {
+            jQuery("#noresults").slideUp(100)
+            jQuery(".thistable").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td></tr>");
+
+          }
+        }
+      })
+
+
+    })
+    function getval(obj) {
+      console.log(obj.value)
+      switch (parseInt(obj.value)) {
+        case 1:
+          tipo = 'Unidad'
+          price = currentProd.precio_unidad
+          t = currentProd.precio_unidad * jQuery("#qty").val()
+          jQuery("#total").html(t)
+          console.log(1)
+          break;
+        case 2:
+          tipo = 'Al por mayor'
+          price = currentProd.precio_mayor
+          t = currentProd.precio_mayor * jQuery("#qty").val()
+          jQuery("#total").html(t)
+          console.log(2)
+          break;
+      }
+    }
+    function getval2() {
+      if (jQuery("#qty").val() == '') {
+        jQuery("#qty").val(1)
+
+      } else if (jQuery("#qty").val() >= currentProd.cantidad) {
+        jQuery("#qty").val(currentProd.cantidad)
+
+      }
+      t = price * jQuery("#qty").val()
+      jQuery("#total").html(t)
+    }
+
+    function addMe(id) {
+      let flag = true
+      for (let p of prods) {
+        if (p.id == id) {
+          alert("Este producto ya está en la factura. Para modificarlo, elimínelo utilizando el botón rojo a la derecha del elemento correspondiente")
+          flag = false
+        }
+      }
+      if (flag) {
+        for (let p of productList) {
+          if (p.id == id) {
+            currentProd = p;
+            price = p.precio_unidad
+            t = p.precio_unidad
+            jQuery("#receipt").html("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td><select class='uk-select' id='unity' onchange='getval(this)'><option value='1'>Unidad</option><option value='2'>Al por mayor</option></select></td><td><input oninput='getval2()' onclick='getval2()' class='uk-input' type='number' maxlength='3' id='qty' value='1' min='1'/></td><td id='total'>" + p.precio_unidad + "</td><td></td></tr>");
+            jQuery(".openthischeese").click()
+
+          }
+        }
+      }
+    }
+    function addProduct() {
+      currentProd.cantidadVenta = jQuery("#qty").val()
+      currentProd.tipo = tipo
+      currentProd.total = t
+      prods.push(currentProd)
+      jQuery("#receipts").append("<tr><td>" + currentProd.id + "</td><td>" + currentProd.nombre + "</td><td>" + currentProd.tipo + "</td><td>" + currentProd.cantidadVenta + "</td><td id='totalinrec'>" + currentProd.total + "</td><td><button class='uk-button uk-button-danger uk-button-small' onclick='deleteme(" + currentProd.id + ")' type='button'>X</button></td></tr>");
+      jQuery("#save").slideDown(100)
+      tipo = 'Unidad'
+      t = 0
+      price = 0
+      quantity = 1
+    }
+  function saveSale() {
+    for(let p of prods) {
+      if(p.venta_semanal == undefined) p.venta_semanal = 0
+      if(p.venta_quincenal == undefined) p.venta_quincenal = 0
+       let updates = {}
+       updates['products/' + p.id] = {
+        id: p.id,
+        nombre: p.nombre,
+        fecha_creacion: p.fecha_creacion,
+        fecha_elaboracion: p.fecha_elaboracion,
+        fecha_vencimiento: p.fecha_vencimiento,
+        precio_unidad: p.precio_unidad,
+        precio_mayor: p.precio_mayor,
+        cantidad: p.cantidad - p.cantidadVenta,
+        venta_semanal: p.venta_semanal + p.total,
+        venta_quincenal: p.venta_quincenal + p.total
+      }
+       firebase.database().ref().update(updates)
+      jQuery(".anotherone").click();
+    }
+  }
+    function deleteme(id) {
+      for (let p of prods) {
+        if (p.id == id) {
+          console.log("Borrando el id " + id)
+          let pos = prods.indexOf(p);
+          console.log("La posicion es " + pos)
+          prods.splice(pos, 1)
+        }
+      }
+      jQuery("#receipts").html("")
+      for (let p of prods) {
+        console.log("Agregando el producto " + p.id)
+        jQuery("#receipts").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.tipo + "</td><td>" + p.cantidadVenta + "</td><td id='totalinrec'>" + p.total + "</td><td><button class='uk-button uk-button-danger uk-button-small' onclick='deleteme(" + p.id + ")' type='button'>X</button></td></tr>");
+
+      }
+      if (prods.length == 0) {
+        jQuery("#save").slideUp(100)
+        jQuery("#receipts").html("")
+      }
+    }
+    function closethis() {
+      const remote = require('electron').remote;
+
+        var window = remote.getCurrentWindow();
+        window.close();
+    }
+    require('./renderer.js')
+  </script>
+</body>
+
+</html>
