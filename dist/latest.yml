@@ -1,9 +1,9 @@
 version: 1.0.0
 files:
   - url: inventario-setup-1.0.0.exe
-    sha512: 0h/vefnBQJA7QiKx7ea1SwuKkTNkjz2OEHFoQ0Bfi0CUsK7szxbRu8oUYrtMgrjTh6UJsEmVW0oriBOvJ3urAQ==
-    size: 38307434
+    sha512: x77dIG0hx85sSbwlGHo9lefG5yguIp4rykGL2nsJOcpBklo+74jYC/RfqugNyaxs7EQAWoql3iEn6WgrVzFDRA==
+    size: 38306403
 path: inventario-setup-1.0.0.exe
-sha512: 0h/vefnBQJA7QiKx7ea1SwuKkTNkjz2OEHFoQ0Bfi0CUsK7szxbRu8oUYrtMgrjTh6UJsEmVW0oriBOvJ3urAQ==
-sha2: 71ef832fb85239ec95120aea0c39accc7d7a32b738843d747ad6184e5e3385c2
-releaseDate: '2018-03-18T00:53:10.490Z'
+sha512: x77dIG0hx85sSbwlGHo9lefG5yguIp4rykGL2nsJOcpBklo+74jYC/RfqugNyaxs7EQAWoql3iEn6WgrVzFDRA==
+sha2: 0b551ecf9ce376d30cc7084f0a1513534874481f9f5b27e5dded83568c0d9635
+releaseDate: '2018-03-19T04:08:42.798Z'
