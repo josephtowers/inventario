@@ -30,10 +30,10 @@
   <div style="padding: 100px; text-align: center">
     <h2>Consultar producto</h2>
     <div class="uk-card uk-card-default uk-card-body">
-      <input class="uk-input" title="Nombre de producto" id="criteria" placeholder="Ingrese el nombre del producto que desea buscar" style="margin-bottom: 20px"
-      />
+      <input class="uk-input" title="Nombre de producto" id="criteria" placeholder="Ingrese el nombre del producto que desea buscar"
+        style="margin-bottom: 20px" />
     </div>
-    <table class="uk-table uk-table-striped uk-table-small" style="text-align: left">
+    <table class="uk-table uk-table-striped uk-table-small uk-table-hover" style="text-align: left">
       <thead>
         <tr>
           <th class="uk-table-shrink">ID</th>
@@ -55,41 +55,85 @@
     <div uk-alert style="display: none" id="noresults">
       <h3>Aviso</h3>
       <p>La búsqueda no obtuvo ningún resultado. Verifique que ha escrito el producto correctamente e inténtelo de nuevo.</p>
-  </div>
-  <button hidden class="uk-button uk-button-default uk-margin-small-right wethebest" type="button" uk-toggle="target: #modal-example-three">Open</button>
-  
+    </div>
+    <button hidden class="uk-button uk-button-default uk-margin-small-right wethebest" type="button" uk-toggle="target: #modal-example-three">Open</button>
+    <button hidden class="uk-button uk-button-default uk-margin-small-right khaled" type="button" uk-toggle="target: #modal-example-four">Open</button>
+
     <div id="modal-example-three" uk-modal>
       <div class="uk-modal-dialog uk-modal-body underten">
-          <button class="uk-modal-close-default" type="button" uk-close></button>
-          <h2 class="uk-modal-title">Aviso</h2>
-          <p id="explan">Los siguientes productos tienen 10 unidades o menos en existencia:</p>
-          <p class="uk-text-right">
-              <button class="uk-button uk-button-primary uk-modal-close" type="button">Aceptar</button>
-          </p>
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <h2 class="uk-modal-title">Aviso</h2>
+        <p id="explan">Los siguientes productos tienen 10 unidades o menos en existencia:</p>
+        <p class="uk-text-right">
+          <button class="uk-button uk-button-primary uk-modal-close" type="button">Aceptar</button>
+        </p>
       </div>
-  </div>
+    </div>
+    <div id="modal-example-four" uk-modal>
+      <div class="uk-modal-dialog uk-modal-body">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <h2 class="uk-modal-title">Editar producto</h2>
+        <div style="text-align: left">
+          <div>
+            <label class="uk-form-label">Nombre del producto</label>
+            <input class="uk-input" id="nombre" style="margin-bottom: 20px" />
+          </div>
+          <div class="uk-flex uk-flex-center">
+            <div>
+              <label class="uk-form-label">Fecha de elaboración</label>
+              <input class="uk-input" id="elab" type="date" style="margin-bottom: 20px" />
+            </div>
+            <div>
+              <label class="uk-form-label">Fecha de vencimiento</label>
+              <input class="uk-input" id="expire" type="date" style="margin-bottom: 20px" />
+            </div>
+          </div>
+          <div class="uk-flex uk-flex-center">
+            <div>
+              <label class="uk-form-label">Precio por unidad</label>
+              <input class="uk-input" id="unit" type="number" value="0" style="margin-bottom: 20px" />
+            </div>
+            <div>
+              <label class="uk-form-label">Precio al por mayor</label>
+              <input class="uk-input" id="whole" type="number" value="0" style="margin-bottom: 20px" />
+            </div>
+            <div>
+              <label class="uk-form-label">Cantidad en existencia</label>
+              <input class="uk-input" id="stock" type="number" value="0" style="margin-bottom: 20px" />
+            </div>
+          </div>
+        </div>
+        <p class="uk-text-right">
+          <button class="uk-button uk-button-danger uk-modal-close forceerase" hidden>Eliminar</button>
+          <button class="uk-button uk-button-danger eraseproduct" onclick="deleteProduct()">Eliminar</button>
+          <button class="uk-button uk-button-primary uk-modal-close" onclick="saveProduct()">Guardar</button>
+        </p>
+      </div>
+    </div>
   </div>
   <script>
     // You can also require other files to run in this process
+    let productList = [];
+    let underTen = []
+    let currentProd = null
+
     jQuery(document).ready(function () {
-      let productList = [];
-      let underTen = []
       var database = firebase.database();
       firebase.database().ref('/products').once('value').then(function (snapshot) {
         var products = (snapshot.val()) || null;
-        for (let p in products)  {
+        for (let p in products) {
           if (typeof products[p] == 'object') {
-            if(products[p].cantidad <= 10) underTen.push(products[p])
+            if (products[p].cantidad <= 10) underTen.push(products[p])
             productList.push(products[p])
           }
         }
         for (let p of productList) {
-            jQuery("#noresults").slideUp(100)
-          jQuery("#products").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>"+p.venta_semanal+"</td><td>"+p.venta_quincenal+"</td></tr>");
+          jQuery("#noresults").slideUp(100)
+          jQuery("#products").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>" + p.venta_semanal + "</td><td>" + p.venta_quincenal + "</td></tr>");
         }
-        if(underTen.length) {
+        if (underTen.length) {
           let inputText = "<ul>"
-          for(let u of underTen) {
+          for (let u of underTen) {
             inputText += "<li>" + u.nombre + "</li>"
           }
           inputText += "</ul>"
@@ -111,25 +155,89 @@
 
 
             for (let p of searchResults) {
-            jQuery("#noresults").slideUp(100)
-              jQuery("#products").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>"+p.venta_semanal+"</td><td>"+p.venta_quincenal+"</td></tr>");
+              jQuery("#noresults").slideUp(100)
+              jQuery("#products").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>" + p.venta_semanal + "</td><td>" + p.venta_quincenal + "</td></tr>");
             }
           }
           else {
             jQuery("#noresults").slideDown(100)
-           }
+          }
 
         }
         else {
           jQuery("#products").html("");
           for (let p of productList) {
             jQuery("#noresults").slideUp(100)
-            jQuery("#products").append("<tr><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>"+p.venta_semanal+"</td><td>"+p.venta_quincenal+"</td></tr>");
+            jQuery("#products").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>" + p.venta_semanal + "</td><td>" + p.venta_quincenal + "</td></tr>");
           }
         }
       })
     })
+    function reloadPage() {
+      firebase.database().ref('/products').once('value').then(function (snapshot) {
+        underTen = []
+        productList = []
+        jQuery("#products").html("")
+        var products = (snapshot.val()) || null;
+        for (let p in products) {
+          if (typeof products[p] == 'object') {
+            productList.push(products[p])
+          }
+        }
+        for (let p of productList) {
+          jQuery("#noresults").slideUp(100)
+          jQuery("#products").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.fecha_creacion + "</td><td>" + p.fecha_elaboracion + "</td><td>" + p.fecha_vencimiento + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td><td>" + p.venta_semanal + "</td><td>" + p.venta_quincenal + "</td></tr>");
+        }
+      });
+    }
+    function addMe(id) {
+      let flag = true
+      currentProd = {}
+      if (flag) {
+        for (let p of productList) {
+          if (p.id == id) {
+            currentProd = p;
+            jQuery("#nombre").val(currentProd.nombre)
+            jQuery("#elab").val(currentProd.fecha_elaboracion)
+            jQuery("#expire").val(currentProd.fecha_vencimiento)
+            jQuery("#unit").val(currentProd.precio_unidad)
+            jQuery("#whole").val(currentProd.precio_mayor)
+            jQuery("#stock").val(currentProd.cantidad)
+            jQuery(".khaled").click()
 
+          }
+        }
+      }
+    }
+    function saveProduct() {
+      currentProd.nombre = jQuery("#nombre").val()
+      currentProd.fecha_elaboracion = jQuery("#elab").val()
+      currentProd.fecha_vencimiento = jQuery("#expire").val()
+      currentProd.precio_unidad = parseFloat(jQuery("#unit").val())
+      currentProd.precio_mayor = parseFloat(jQuery("#whole").val())
+      currentProd.cantidad = parseInt(jQuery("#stock").val())
+      firebase.database().ref('products/' + currentProd.id).set(currentProd);
+      reloadPage()
+      currentProd = null
+      UIkit.notification("<span uk-icon='icon: check'></span> Se ha guardado el producto");
+    }
+    let confirmation = false
+    function deleteProduct() {
+      jQuery(".eraseproduct").html("Confirmar eliminación")
+      setTimeout(function () {
+        jQuery(".eraseproduct").html("Eliminar")
+        confirmation = false
+      }, 3000)
+      if (confirmation) {
+        jQuery(".forceerase").click()
+        firebase.database().ref('products/' + currentProd.id).set(null);
+        reloadPage()
+        currentProd = null
+        UIkit.notification("<span uk-icon='icon: check'></span> Se ha eliminado el producto");
+        confirmation = false
+      }
+      confirmation = true
+    }
     require('./renderer.js')
   </script>
 </body>

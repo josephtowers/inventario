@@ -144,7 +144,7 @@
         console.log(productList)
         for (let p of productList) {
           jQuery("#noresults").slideUp(100)
-          jQuery(".thistable").append("<tr onclick='addMe(" + p.id + ")' onclick='alert()' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td></tr>");
+          jQuery(".thistable").append("<tr onclick='addMe(" + p.id + ")' style='cursor: pointer'><td>" + p.id + "</td><td>" + p.nombre + "</td><td>" + p.precio_unidad + "</td><td>" + p.precio_mayor + "</td><td>" + p.cantidad + "</td></tr>");
         }
         if(underTen.length) {
           let inputText = "<ul>"
@@ -269,8 +269,8 @@
         precio_unidad: p.precio_unidad,
         precio_mayor: p.precio_mayor,
         cantidad: p.cantidad - p.cantidadVenta,
-        venta_semanal: p.venta_semanal + p.total,
-        venta_quincenal: p.venta_quincenal + p.total
+        venta_semanal: p.venta_semanal + p.cantidadVenta,
+        venta_quincenal: p.venta_quincenal + p.cantidadVenta
       }
        firebase.database().ref().update(updates)
       jQuery(".anotherone").click();
